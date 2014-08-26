@@ -26,6 +26,7 @@ solution "lua_tinker"
       {
           "Unicode", 
           "WinMain",
+          "Symbols" 
       }
 
       defines "_CRT_SECURE_NO_WARNINGS"
@@ -39,7 +40,6 @@ solution "lua_tinker"
              "_DEBUG", 
              "DEBUG" 
          }
-         flags { "Symbols" }
          optimize "Off"
  
       configuration "Release*"
