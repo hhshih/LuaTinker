@@ -13,6 +13,7 @@
 #include <cstring>
 #include <type_traits>
 #include "lua/lua.hpp"
+#include "Scripter/lua_tinker_extend_include.h"
 
 #define ADD_CPREFIX(s) "_C_" s
 
@@ -257,6 +258,7 @@ namespace lua_tinker
             lua_setmetatable(L, -2);
         }
     };
+
 
     template<typename T>
     void type2lua(lua_State *L, T val)
@@ -826,6 +828,32 @@ namespace lua_tinker
         return pop<RVal>(L);
     }
 
+    template<typename RVal, typename T1, typename T2, typename T3, typename T4>
+    RVal call(lua_State* L, const char* name, T1 arg1, T2 arg2, T3 arg3, T4 arg4)
+    {
+        lua_pushcclosure(L, on_error, 0);
+        int errfunc = lua_gettop(L);
+
+        lua_pushstring(L, name);
+        lua_gettable(L, LUA_GLOBALSINDEX);
+        if (lua_isfunction(L, -1))
+        {
+            push(L, arg1);
+            push(L, arg2);
+            push(L, arg3);
+            push(L, arg4);
+            lua_pcall(L, 4, 1, errfunc);
+        }
+        else
+        {
+            print_error(L, "lua_tinker::call() attempt to call global `%s' (not a function)", name);
+        }
+
+        lua_remove(L, errfunc);
+        return pop<RVal>(L);
+    }
+
+
     // class init
     template<typename T>
     void class_add(lua_State* L, const char* name)
@@ -1011,6 +1039,10 @@ namespace lua_tinker
 
         table_obj*		m_obj;
     };
+
+
 } // namespace lua_tinker
+
+#include "Scripter/lua_tinker_extend.h"
 
 #endif //_LUA_TINKER_H_
