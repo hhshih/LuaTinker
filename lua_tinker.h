@@ -13,7 +13,6 @@
 #include <cstring>
 #include <type_traits>
 #include "lua/lua.hpp"
-#include "Scripter/lua_tinker_extend_include.h"
 
 #define ADD_CPREFIX(s) "_C_" s
 
@@ -1043,6 +1042,5 @@ namespace lua_tinker
 
 } // namespace lua_tinker
 
-#include "Scripter/lua_tinker_extend.h"
 
 #endif //_LUA_TINKER_H_
