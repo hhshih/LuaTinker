@@ -740,26 +740,6 @@ lua_tinker::table::~table()
     m_obj->dec_ref();
 }
 
-/*---------------------------------------------------------------------------*/ 
-// custom extension
-/*---------------------------------------------------------------------------*/ 
-
-// ASSUME: component metatable is on top of the stack
-void lua_tinker::propertyfield_helper(lua_State* L, const char* name)
-{
-    lua_getfield(L, -1, "_Properties");
-    if (!lua_istable(L, -1))
-    {
-        lua_pop(L, 1);
-        lua_createtable(L, 1, 0);
-        lua_pushvalue(L, -1);
-        lua_setfield(L, -3, "_Properties");
-    } // remain on stack from top: _Properties_table metatable
-    lua_pushnumber(L, lua_objlen(L, -1) + 1);
-    lua_pushstring(L, name);
-    lua_settable(L, -3);
-    lua_pop(L, 1);
-} // stack aren't changed after this operation
 
 
 
