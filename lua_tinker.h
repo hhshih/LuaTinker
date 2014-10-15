@@ -18,8 +18,6 @@
 
 namespace lua_tinker
 {
-    void propertyfield_helper(lua_State* L, const char* name);
-
     // init LuaTinker
     void	init(lua_State *L);
 
