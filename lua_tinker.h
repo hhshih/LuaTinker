@@ -942,23 +942,6 @@ namespace lua_tinker
     }
 
 
-
-     // Tinker Class Variables
-    template<typename T, typename BASE, typename VAR>
-    void class_mem_modified(lua_State* L, const char* name, VAR BASE::*val)
-    {
-        push_meta(L, class_name<T>::name());
-        propertyfield_helper(L, name);
-
-        if (lua_istable(L, -1))
-        {
-            lua_pushstring(L, name);
-            new(lua_newuserdata(L, sizeof(mem_var<BASE, VAR>))) mem_var<BASE, VAR>(val);
-            lua_rawset(L, -3);
-        }
-        lua_pop(L, 1);
-    }
-
     template<typename T>
     struct class_name
     {
