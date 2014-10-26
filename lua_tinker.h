@@ -180,7 +180,7 @@ namespace lua_tinker
         {
             if (!lua_isuserdata(L, index))
             {
-                lua_pushstring(L, "\nNo class at first argument. (forgot ':' expression ?)");
+                lua_pushstring(L, "No class at first argument. (forgot ':' expression ?)");
                 lua_error(L);
             }
 #ifdef DO_LUA_TYPECHECKING
