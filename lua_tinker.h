@@ -200,7 +200,7 @@ namespace lua_tinker
 
 
 
-                    if(true_class_name[0] != '\0')
+                    if(true_class_name[0] == '\0')
                     {
                         lua_pushliteral(L, "Invalid input argument type");
                         on_error(L);
