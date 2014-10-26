@@ -231,8 +231,9 @@ int lua_tinker::on_error(lua_State *L)
     print_error(L, "==============================\n");   
     call_stack(L, 0);
     print_error(L, "==============================\n");
-    lua_pushliteral(L, "_DumpLocals");
+    lua_getglobal(L, "_DumpLocals");
     lua_pcall(L, 0,0,0);
+    lua_pop(L, 1);
 
     return 0;
 }
