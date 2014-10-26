@@ -198,23 +198,36 @@ namespace lua_tinker
                     const char* true_class_name = class_name<class_type<T>::type>::name();
                     lua_pop(L, 1);
 
-                    DA_ASSERT(true_class_name[0] != '\0', 
-                        "When checking <<%s>> class, cannot find base type name for [[%s]] class! "
-                        "(Use CLASS/COMP_EXPORT on base type, then use CLASS/COMP_INH to specify inheritance)", 
-                        lua_class_name, 
-                        typeid(class_type<T>::type).name());
 
-                    if (std::strcmp(lua_class_name, true_class_name) != 0)
+
+                    if(true_class_name[0] != '\0')
+                    {
+                        lua_pushliteral(L, "Invalid input argument type");
+                        on_error(L);
+
+                        DA_ASSERT(0, 
+                            "When checking <<%s>> class, cannot find base type name for [[%s]] class! "
+                            "(Use CLASS/COMP_EXPORT on base type, then use CLASS/COMP_INH to specify inheritance)", 
+                            lua_class_name, 
+                            typeid(class_type<T>::type).name());
+                    }
+
+                    else if (std::strcmp(lua_class_name, true_class_name) != 0)
                     {
                         lua_pushliteral(L, "__parent");
                         lua_gettable(L, -2);
-
+			
                         if (lua_isnil(L, -1))
+                        {
+                            lua_pushliteral(L, "Invalid input argument type");
+                            on_error(L);
+
                             DA_ASSERT(0, 
                             "Input argument error, expect <<%s>> while [[%s]] is given. "
                             "(Or maybe you should specify inheritance with CLASS_INH)", 
                             true_class_name, 
                             lua_class_name);
+                        }
 
                         has_parent = true;
                     }
