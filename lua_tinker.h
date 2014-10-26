@@ -14,6 +14,10 @@
 #include <type_traits>
 #include "lua/lua.hpp"
 
+namespace Gameplay
+{
+    class GameSpace;
+}
 #define ADD_CPREFIX(s) "_C_" s
 
 namespace lua_tinker
@@ -176,9 +180,49 @@ namespace lua_tinker
         {
             if (!lua_isuserdata(L, index))
             {
-                lua_pushstring(L, "no class at first argument. (forgot ':' expression ?)");
+                lua_pushstring(L, "\nNo class at first argument. (forgot ':' expression ?)");
                 lua_error(L);
             }
+#ifdef DO_LUA_TYPECHECKING
+            else
+            {
+                int top = lua_gettop(L);
+                lua_getmetatable(L, index);
+                bool has_parent;
+                do
+                {
+                    has_parent = false;
+                    lua_pushliteral(L, "__name");
+                    lua_gettable(L, -2);
+                    const char* lua_class_name = lua_tostring(L, -1);
+                    const char* true_class_name = class_name<class_type<T>::type>::name();
+                    lua_pop(L, 1);
+
+                    DA_ASSERT(true_class_name[0] != '\0', 
+                        "When checking <<%s>> class, cannot find base type name for [[%s]] class! "
+                        "(Use CLASS/COMP_EXPORT on base type, then use CLASS/COMP_INH to specify inheritance)", 
+                        lua_class_name, 
+                        typeid(class_type<T>::type).name());
+
+                    if (std::strcmp(lua_class_name, true_class_name) != 0)
+                    {
+                        lua_pushliteral(L, "__parent");
+                        lua_gettable(L, -2);
+
+                        if (lua_isnil(L, -1))
+                            DA_ASSERT(0, 
+                            "Input argument error, expect <<%s>> while [[%s]] is given. "
+                            "(Or maybe you should specify inheritance with CLASS_INH)", 
+                            true_class_name, 
+                            lua_class_name);
+
+                        has_parent = true;
+                    }
+
+                } while (has_parent);
+                lua_settop(L, top);
+            }
+#endif
             return void2type<T>::invoke(user2type<user*>::invoke(L, index)->m_p);
         }
     };

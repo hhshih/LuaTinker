@@ -215,9 +215,9 @@ static void call_stack(lua_State* L, int n)
         }
 
         if(ar.name)
-            lua_tinker::print_error(L, "%s%s() : line %d [%s : line %d]", indent, ar.name, ar.currentline, ar.source, ar.linedefined);
+            lua_tinker::print_error(L, "%s%s() : <<line %d>> [%s : function at line %d]", indent, ar.name, ar.currentline, ar.source, ar.linedefined);
         else
-            lua_tinker::print_error(L, "%sunknown : line %d [%s : line %d]", indent, ar.currentline, ar.source, ar.linedefined);
+            lua_tinker::print_error(L, "%sunknown : <<line %d>> [%s : function at line %d]", indent, ar.currentline, ar.source, ar.linedefined);
 
         call_stack(L, n+1);
     }
@@ -227,9 +227,12 @@ static void call_stack(lua_State* L, int n)
 /*---------------------------------------------------------------------------*/ 
 int lua_tinker::on_error(lua_State *L)
 {
-    print_error(L, "%s", lua_tostring(L, -1));
-
+    print_error(L, "\n%s", lua_tostring(L, -1));
+    print_error(L, "==============================\n");   
     call_stack(L, 0);
+    print_error(L, "==============================\n");
+    lua_pushliteral(L, "_DumpLocals");
+    lua_pcall(L, 0,0,0);
 
     return 0;
 }
