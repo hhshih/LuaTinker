@@ -584,7 +584,7 @@ int lua_tinker::meta_get(lua_State *L)
         if(lua_isnil(L,-1))
         {
             lua_pushfstring(L, "can't find '%s' class variable. (forgot registering class variable ?)", lua_tostring(L, 2));
-            lua_error(L);
+            on_error(L);
         }
     } 
 
