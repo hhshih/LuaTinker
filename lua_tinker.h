@@ -206,8 +206,9 @@ namespace lua_tinker
                         on_error(L);
 
                         DA_ASSERT(0, 
-                            "When checking <<%s>> class, cannot find base type name for [[%s]] class! "
+                            "Input argument *%d* incorrect. When checking <<%s>> class, cannot find base type name for [[%s]] class! "
                             "(Use CLASS/COMP_EXPORT on base type, then use CLASS/COMP_INH to specify inheritance)", 
+                            index - 1,
                             lua_class_name, 
                             typeid(class_type<T>::type).name());
                     }
@@ -223,8 +224,9 @@ namespace lua_tinker
                             on_error(L);
 
                             DA_ASSERT(0, 
-                            "Input argument error, expect <<%s>> while [[%s]] is given. "
-                            "(Or maybe you should specify inheritance with CLASS_INH)", 
+                            "Input argument *%d* incorrect. When checking <<%s>> class, cannot find base type name for [[%s]] class! "
+                            "(Use CLASS/COMP_EXPORT on base type, then use CLASS/COMP_INH to specify inheritance)", 
+                            index - 1,
                             true_class_name, 
                             lua_class_name);
                         }
