@@ -206,12 +206,12 @@ static void call_stack(lua_State* L, int n)
         const char* indent;
         if(n == 0)
         {
-            indent = "->";
-            lua_tinker::print_error(L, "<<--call stack-->>");
+            indent = "-> ";
+            lua_tinker::print_error(L, "[[--call stack--]]");
         }
         else
         {
-            indent = "  ";
+            indent = "   ";
         }
 
         if(ar.name)
@@ -227,7 +227,8 @@ static void call_stack(lua_State* L, int n)
 /*---------------------------------------------------------------------------*/ 
 int lua_tinker::on_error(lua_State *L)
 {
-    print_error(L, "\n%s", lua_tostring(L, -1));
+    print_error(L, "\n==============================\n");   
+    print_error(L, "%s\n", lua_tostring(L, -1));
     print_error(L, "==============================\n");   
     call_stack(L, 0);
     print_error(L, "==============================\n");
