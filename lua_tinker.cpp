@@ -206,18 +206,18 @@ static void call_stack(lua_State* L, int n)
         const char* indent;
         if(n == 0)
         {
-            indent = "->\t";
-            lua_tinker::print_error(L, "\t<call stack>");
+            indent = "->";
+            lua_tinker::print_error(L, "<<--call stack-->>");
         }
         else
         {
-            indent = "\t";
+            indent = "  ";
         }
 
         if(ar.name)
-            lua_tinker::print_error(L, "%s%s() : <<line %d>> [%s : function at line %d]", indent, ar.name, ar.currentline, ar.source, ar.linedefined);
+            lua_tinker::print_error(L, "%s%s() -- <<line %d>> at [%s]", indent, ar.name, ar.currentline, ar.source);
         else
-            lua_tinker::print_error(L, "%sunknown : <<line %d>> [%s : function at line %d]", indent, ar.currentline, ar.source, ar.linedefined);
+            lua_tinker::print_error(L, "%sunknown -- <<line %d>> [%s]", indent, ar.currentline, ar.source);
 
         call_stack(L, n+1);
     }
