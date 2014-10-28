@@ -235,7 +235,7 @@ int lua_tinker::on_error(lua_State *L)
     lua_getglobal(L, "_DumpLocals");
     lua_pcall(L, 0,0,0);
     lua_pop(L, 1);
-    lua_getglobal(L, "_DebugBreak");
+    lua_getglobal(L, "_ReloadBreak");
     lua_pcall(L, 0,0,0);
     lua_pop(L, 1);
 
