@@ -1,8 +1,10 @@
 if (not _ACTION) then return end
 
 -- A solution contains projects, and defines the available configurations
+local all_configurations = {"Debug", "Release"}
+
 solution "lua_tinker"
-   configurations { "Debug", "Release" }
+   configurations (all_configurations)
    location ("build/" .. _ACTION)
    defines {"_WINDOWS", "WIN32"}
  
@@ -47,7 +49,7 @@ solution "lua_tinker"
          optimize "Full"
          flags { 'LinkTimeOptimization', }
 
-      for _, config in ipairs(configurations()) do
+      for _, config in ipairs(all_configurations) do
          configuration(config)
          targetdir ("lib/" .. config)
          objdir ("obj/" .. config)
