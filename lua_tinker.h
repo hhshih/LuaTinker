@@ -79,8 +79,14 @@ namespace lua_tinker
     template<typename A>
     struct base_type<A&> { typedef A type; };
 
-    template<typename A>
-    struct class_type { typedef typename remove_const<typename base_type<A>::type>::type type; };
+    template<typename T>
+    struct clean_type
+    {
+      using type = std::remove_pointer_t<std::remove_const_t<std::remove_reference_t<std::remove_pointer_t<std::remove_const_t<T>>>>>;
+    };
+
+    template<typename T>
+    using class_type = clean_type<T>;
 
     template<typename A>
     struct is_obj { static const bool value = !is_enum<A>::value; };
