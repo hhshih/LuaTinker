@@ -83,7 +83,7 @@ namespace lua_tinker
     struct class_type { typedef typename remove_const<typename base_type<A>::type>::type type; };
 
     template<typename A>
-    struct is_obj { static const bool value = true; };
+    struct is_obj { static const bool value = !is_enum<A>::value; };
     template<> struct is_obj<char>					{ static const bool value = false; };
     template<> struct is_obj<unsigned char>			{ static const bool value = false; };
     template<> struct is_obj<short>					{ static const bool value = false; };
