@@ -4,6 +4,7 @@
 // 
 // please check Licence.txt file for licence and legal issues. 
 
+#include "precompiled.h"
 #include <iostream>
 
 extern "C" 
