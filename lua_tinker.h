@@ -442,7 +442,17 @@ namespace lua_tinker
     template<typename T1>
     struct functor<int, lua_State*, T1>
     {
-        static int invoke(lua_State *L) { return upvalue_<int(*)(lua_State*, T1)>(L)(L, read<T1>(L, 1)); }
+        static int invoke(lua_State *L) 
+        { 
+          try
+          {
+            return upvalue_<int(*)(lua_State*, T1)>(L)(L, read<T1>(L, 1));
+          }
+          catch (std::exception e)
+          {
+            return 0;
+          }
+        }
     };
 
     template<>
@@ -502,8 +512,22 @@ namespace lua_tinker
     {
         V T::*_var;
         mem_var(V T::*val) : _var(val) {}
-        void get(lua_State *L)	{ push<if_<is_obj<V>::value, V&, V>::type>(L, read<T*>(L, 1)->*(_var)); }
-        void set(lua_State *L)	{ read<T*>(L, 1)->*(_var) = read<V>(L, 3); }
+        void get(lua_State *L)	
+        { 
+          try
+          {
+            push<if_<is_obj<V>::value, V&, V>::type>(L, read<T*>(L, 1)->*(_var));
+          }
+          catch (std::exception e) { }
+        }
+        void set(lua_State *L)	
+        { 
+          try
+          {
+            read<T*>(L, 1)->*(_var) = read<V>(L, 3);
+          }
+          catch (std::exception e) {}
+        }
     };
 
 
@@ -534,26 +558,68 @@ namespace lua_tinker
     template<typename RVal, typename T>
     struct mem_functor<RVal, T>
     {
-        static int invoke(lua_State *L) { push(L, (read<T*>(L, 1)->*upvalue_<RVal(T::*)(void)>(L))()); return 1; }
+      static int invoke(lua_State *L) 
+      { 
+        try
+        {
+          push(L, (read<T*>(L, 1)->*upvalue_<RVal(T::*)(void)>(L))()); 
+          return 1;
+        }
+        catch (std::exception e)
+        {
+          return 0;
+        }
+      }
     };
 
     template<typename T>
     struct mem_functor<void, T>
     {
-        static int invoke(lua_State *L) { (read<T*>(L, 1)->*upvalue_<void(T::*)(void)>(L))(); return 0; }
+        static int invoke(lua_State *L) 
+        { 
+          try
+          {
+            (read<T*>(L, 1)->*upvalue_<void(T::*)(void)>(L))();
+            return 0;
+          }
+          catch(std::exception e)
+          {
+            return 0;
+          }
+        }
     };
 
     // class member functor (non-managed)
     template<typename T, typename T1>
     struct mem_functor<int, T, lua_State*, T1>
     {
-        static int invoke(lua_State *L) { return (read<T*>(L, 1)->*upvalue_<int(T::*)(lua_State*, T1)>(L))(L, read<T1>(L, 2)); }
+        static int invoke(lua_State *L) 
+        { 
+          try
+          {
+            return (read<T*>(L, 1)->*upvalue_<int(T::*)(lua_State*, T1)>(L))(L, read<T1>(L, 2));
+          }
+          catch (std::exception e)
+          {
+            return 0;
+          }
+        }
     };
 
     template<typename T>
     struct mem_functor<int, T, lua_State*>
     {
-        static int invoke(lua_State *L) { return (read<T*>(L, 1)->*upvalue_<int(T::*)(lua_State*)>(L))(L); }
+        static int invoke(lua_State *L) 
+        {
+          try
+          {
+            return (read<T*>(L, 1)->*upvalue_<int(T::*)(lua_State*)>(L))(L);
+          }
+          catch (std::exception e)
+          {
+            return 0;
+          }
+        }
     };
 
     // push_functor
@@ -594,7 +660,17 @@ namespace lua_tinker
         lua_setmetatable(L, -2);
         return 1;
       }
-      static int invoke(lua_State *L) { return invoker(L, build_indices<sizeof...(Args)>{}); }
+      static int invoke(lua_State *L) 
+      { 
+        try
+        {
+          return invoker(L, build_indices<sizeof...(Args)>{});
+        }
+        catch (std::exception e)
+        {
+          return 0;
+        }
+      }
     };
 
     // constructor
