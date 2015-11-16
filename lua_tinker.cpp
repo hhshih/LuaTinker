@@ -310,79 +310,79 @@ void lua_tinker::enum_stack(lua_State *L)
 /* read                                                                      */ 
 /*---------------------------------------------------------------------------*/ 
 template<>
-char* lua_tinker::read(lua_State *L, int index)
+char* lua_tinker::read<char*>(lua_State *L, int index)
 {
     return (char*)lua_tostring(L, index);				
 }
 
 template<>
-const char* lua_tinker::read(lua_State *L, int index)
+const char* lua_tinker::read<const char*>(lua_State *L, int index)
 {
     return (const char*)lua_tostring(L, index);		
 }
 
 template<>
-char lua_tinker::read(lua_State *L, int index)
+char lua_tinker::read<char>(lua_State *L, int index)
 {
     return (char)lua_tonumber(L, index);				
 }
 
 template<>
-unsigned char lua_tinker::read(lua_State *L, int index)
+unsigned char lua_tinker::read<unsigned char>(lua_State *L, int index)
 {
     return (unsigned char)lua_tonumber(L, index);		
 }
 
 template<>
-short lua_tinker::read(lua_State *L, int index)
+short lua_tinker::read<short>(lua_State *L, int index)
 {
     return (short)lua_tonumber(L, index);				
 }
 
 template<>
-unsigned short lua_tinker::read(lua_State *L, int index)
+unsigned short lua_tinker::read<unsigned short>(lua_State *L, int index)
 {
     return (unsigned short)lua_tonumber(L, index);	
 }
 
 template<>
-long lua_tinker::read(lua_State *L, int index)
+long lua_tinker::read<long>(lua_State *L, int index)
 {
     return (long)lua_tonumber(L, index);				
 }
 
 template<>
-unsigned long lua_tinker::read(lua_State *L, int index)
+unsigned long lua_tinker::read<unsigned long>(lua_State *L, int index)
 {
     return (unsigned long)lua_tonumber(L, index);		
 }
 
 template<>
-int lua_tinker::read(lua_State *L, int index)
+int lua_tinker::read<int>(lua_State *L, int index)
 {
     return (int)lua_tonumber(L, index);				
 }
 
 template<>
-unsigned int lua_tinker::read(lua_State *L, int index)
+unsigned int lua_tinker::read<unsigned int>(lua_State *L, int index)
 {
     return (unsigned int)lua_tonumber(L, index);		
 }
 
 template<>
-float lua_tinker::read(lua_State *L, int index)
+float lua_tinker::read<float>(lua_State *L, int index)
 {
     return (float)lua_tonumber(L, index);				
 }
 
 template<>
-double lua_tinker::read(lua_State *L, int index)
+double lua_tinker::read<double>(lua_State *L, int index)
 {
     return (double)lua_tonumber(L, index);			
 }
 
 template<>
-bool lua_tinker::read(lua_State *L, int index)
+bool lua_tinker::read<bool>(lua_State *L, int index)
 {
     if(lua_isboolean(L, index))
         return lua_toboolean(L, index) != 0;				
@@ -391,14 +391,14 @@ bool lua_tinker::read(lua_State *L, int index)
 }
 
 template<>
-void lua_tinker::read(lua_State *L, int index)
+void lua_tinker::read<void>(lua_State *L, int index)
 {
     (void)L; (void)index;
     return;											
 }
 
 template<>
-long long lua_tinker::read(lua_State *L, int index)
+long long lua_tinker::read<long long>(lua_State *L, int index)
 {
     if(lua_isnumber(L,index))
         return (long long)lua_tonumber(L, index);
@@ -406,7 +406,7 @@ long long lua_tinker::read(lua_State *L, int index)
         return *(long long*)lua_touserdata(L, index);
 }
 template<>
-unsigned long long lua_tinker::read(lua_State *L, int index)
+unsigned long long lua_tinker::read<unsigned long long>(lua_State *L, int index)
 {
     if(lua_isnumber(L,index))
         return (unsigned long long)lua_tonumber(L, index);
@@ -415,7 +415,7 @@ unsigned long long lua_tinker::read(lua_State *L, int index)
 }
 
 template<>
-lua_tinker::table lua_tinker::read(lua_State *L, int index)
+lua_tinker::table lua_tinker::read<lua_tinker::table>(lua_State *L, int index)
 {
     return table(L, index);
 }
@@ -567,6 +567,32 @@ static void invoke_parent(lua_State *L)
             lua_remove(L,-2);
         }
     }
+}
+
+int lua_tinker::meta_get_no_error(lua_State *L)
+{
+    lua_getmetatable(L,1);
+    lua_pushvalue(L,2);
+    lua_rawget(L,-2);
+
+    if(lua_isuserdata(L,-1))
+    {
+        user2type<var_base*>::invoke(L,-1)->get(L);
+        lua_remove(L, -2);
+    }
+    else if(lua_isnil(L,-1))
+    {
+        lua_remove(L,-1);
+        invoke_parent(L);
+        if(lua_isnil(L,-1))
+        {
+          // do nothing
+        }
+    } 
+
+    lua_remove(L,-2);
+
+    return 1;
 }
 
 /*---------------------------------------------------------------------------*/ 

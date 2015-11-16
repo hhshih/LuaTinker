@@ -39,6 +39,7 @@ namespace lua_tinker
     void	print_error(lua_State *L, const char* fmt, ...);
 
     // class helper
+    int meta_get_no_error(lua_State *L);
     int meta_get(lua_State *L);
     int meta_set(lua_State *L);
     void push_meta(lua_State *L, const char* name);
@@ -84,6 +85,9 @@ namespace lua_tinker
     {
       using type = std::remove_pointer_t<std::remove_const_t<std::remove_reference_t<std::remove_pointer_t<std::remove_const_t<T>>>>>;
     };
+
+    template<typename T>
+    using remove_const_reference = std::remove_const_t<std::remove_reference_t<T>>;
 
     template<typename T>
     using class_type = clean_type<T>;
@@ -385,6 +389,9 @@ namespace lua_tinker
     template<>	void push(lua_State *L, long long ret);
     template<>	void push(lua_State *L, unsigned long long ret);
     template<>	void push(lua_State *L, table ret);
+    
+    template<typename T>
+    using RefCorrector = typename if_<is_obj<remove_const_reference<T>>::value, T ,remove_const_reference<T>>::type;
 
     // pop a value from lua stack
     template<typename T>
@@ -411,7 +418,7 @@ namespace lua_tinker
           try { return invoker(L, build_indices<sizeof...(Args)>{}); }
           catch (std::exception e) { return 0; }
         }
-        template<std::size_t... Is> static int invoker(lua_State* L, indices<Is...>) { push(L, upvalue_<RVal(*)(Args...)>(L)(read<Args>(L, Is + 1)...)); return 1; }
+        template<std::size_t... Is> static int invoker(lua_State* L, indices<Is...>) { push(L, upvalue_<RVal(*)(Args...)>(L)(read<RefCorrector<Args>>(L, Is + 1)...)); return 1; }
     };
 
     template<typename ...Args>
@@ -422,7 +429,7 @@ namespace lua_tinker
           try { return invoker(L, build_indices<sizeof...(Args)>{}); }
           catch (std::exception e) { return 0; }
         }
-        template<std::size_t... Is> static int invoker(lua_State* L, indices<Is...>) { upvalue_<void(*)(Args...)>(L)(read<Args>(L, Is + 1)...); return 0; }
+        template<std::size_t... Is> static int invoker(lua_State* L, indices<Is...>) { upvalue_<void(*)(Args...)>(L)(read<RefCorrector<Args>>(L, Is + 1)...); return 0; }
     };
 
 
@@ -540,7 +547,7 @@ namespace lua_tinker
           try { return invoker(L, build_indices<sizeof...(Args)>{}); }
           catch (std::exception e) { return 0; }
         }
-        template<std::size_t... Is> static int invoker(lua_State* L, indices<Is...>) { push(L, (read<T*>(L, 1)->*upvalue_<RVal(T::*)(Args...)>(L))(read<Args>(L, Is + 2)...)); return 1; }
+        template<std::size_t... Is> static int invoker(lua_State* L, indices<Is...>) { push(L, (read<T*>(L, 1)->*upvalue_<RVal(T::*)(Args...)>(L))(read<RefCorrector<Args>>(L, Is + 2)...)); return 1; }
     };
 
     template<typename T, typename ...Args>
@@ -551,7 +558,7 @@ namespace lua_tinker
           try { return invoker(L, build_indices<sizeof...(Args)>{}); }
           catch (std::exception e) { return 0; }
         }
-        template<std::size_t... Is> static int invoker(lua_State* L, indices<Is...>) { (read<T*>(L, 1)->*upvalue_<void(T::*)(Args...)>(L))(read<Args>(L, Is + 2)...); return 0; }
+        template<std::size_t... Is> static int invoker(lua_State* L, indices<Is...>) { (read<T*>(L, 1)->*upvalue_<void(T::*)(Args...)>(L))(read<RefCorrector<Args>>(L, Is + 2)...); return 0; }
     };
 
 
@@ -655,7 +662,7 @@ namespace lua_tinker
     {
       template<std::size_t... Is> static int invoker(lua_State* L, indices<Is...>) 
       { 
-        new(lua_newuserdata(L, sizeof(val2user<T>))) val2user<T>(read<Args>(L, Is + 2)...);
+        new(lua_newuserdata(L, sizeof(val2user<T>))) val2user<T>(read<RefCorrector<Args>>(L, Is + 2)...);
         push_meta(L, class_name<typename class_type<T>::type>::name());
         lua_setmetatable(L, -2);
         return 1;
@@ -851,6 +858,10 @@ namespace lua_tinker
 
         lua_pushstring(L, "__name");
         lua_pushstring(L, name);
+        lua_rawset(L, -3);
+
+        lua_pushstring(L, "TryGet");
+        lua_pushcclosure(L, meta_get_no_error, 0);
         lua_rawset(L, -3);
 
         lua_pushstring(L, "__index");
