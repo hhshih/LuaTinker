@@ -523,7 +523,7 @@ namespace lua_tinker
         { 
           try
           {
-            push<if_<is_obj<V>::value, V&, V>::type>(L, read<T*>(L, 1)->*(_var));
+            push<if_<is_obj<V>::value && !std::is_pointer<V>::value, V&, V>::type>(L, read<T*>(L, 1)->*(_var));
           }
           catch (std::exception e) { }
         }
